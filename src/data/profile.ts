@@ -28,12 +28,12 @@ export const PROFILE = {
     },
     {
       label: 'LinkedIn',
-      href: 'https://www.linkedin.com/in/',
+      href: 'https://www.linkedin.com/in/tushar-g-60001487/',
       kind: 'linkedin',
     },
     {
       label: 'Email',
-      href: 'mailto:hello@knowtushar.com',
+      href: 'mailto:tushar.behror@gmail.com',
       kind: 'email',
     },
   ] satisfies SocialLink[],
