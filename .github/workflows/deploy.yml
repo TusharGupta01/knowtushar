@@ -1,0 +1,43 @@
+name: Deploy to S3 & CloudFront
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+
+concurrency:
+  group: deploy-knowtushar
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::484070027588:role/knowtushar-github-deploy
+          aws-region: ap-south-1
+
+      - name: Build and deploy to S3 + CloudFront
+        env:
+          S3_BUCKET: knowtushar-site-484070027588
+          CLOUDFRONT_DISTRIBUTION_ID: E2NK8VP7IMDF7X
+        run: npm run deploy:s3
