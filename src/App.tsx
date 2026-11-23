@@ -34,10 +34,10 @@ export function App() {
   }, []);
 
   return (
-    <div className="flex min-h-screen flex-col bg-white text-zinc-900 dark:bg-zinc-950 dark:text-zinc-100">
+    <div className="flex min-h-screen flex-col text-[var(--ink)]">
       <Navbar theme={theme} onToggleTheme={toggleTheme} activeRoute={route} />
       <main
-        className={`mx-auto w-full max-w-3xl flex-1 px-6 ${
+        className={`mx-auto w-full max-w-3xl flex-1 px-4 sm:px-6 ${
           route === 'intro' ? 'flex flex-col justify-center' : ''
         }`}
       >

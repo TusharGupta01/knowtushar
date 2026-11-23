@@ -9,26 +9,31 @@ interface NavbarProps {
   activeRoute: PageRoute;
 }
 
-const NAV_ITEMS: { label: string; href: string; route: PageRoute }[] = [
-  { label: 'Intro', href: '#/', route: 'intro' },
-  { label: 'Experience', href: '#/experience', route: 'experience' },
-  { label: 'Notes', href: '#/notes', route: 'notes' },
+const NAV_ITEMS: { label: string; href: string; route: PageRoute; shortcut: string }[] = [
+  { label: 'Intro', href: '#/', route: 'intro', shortcut: '1' },
+  { label: 'Experience', href: '#/experience', route: 'experience', shortcut: '2' },
+  { label: 'Notes', href: '#/notes', route: 'notes', shortcut: '3' },
 ];
 
 export function Navbar({ theme, onToggleTheme, activeRoute }: NavbarProps) {
   return (
-    <header className="sticky top-0 z-30 border-b border-zinc-200/80 bg-white/80 backdrop-blur-md dark:border-zinc-800/80 dark:bg-zinc-950/80">
-      <div className="mx-auto flex h-16 max-w-3xl items-center justify-between px-6">
+    <header className="sticky top-4 z-30 px-4 sm:px-6">
+      <div className="sketch-toolbar mx-auto flex w-fit max-w-full items-center gap-1.5 px-3 py-1.5 sm:gap-2 sm:px-3.5 sm:py-2">
         <a
           href="#/"
-          className="text-sm font-semibold tracking-tight text-zinc-900 dark:text-zinc-100"
+          className="font-sketch px-1.5 text-xl font-bold tracking-tight text-[var(--ink)] transition-opacity hover:opacity-80 sm:text-2xl"
         >
           {PROFILE.handle}
-          <span className="text-emerald-600 dark:text-emerald-400">.</span>
+          <span className="text-[#6965db] dark:text-[#a8a5ff]">.</span>
         </a>
 
-        <nav aria-label="Primary" className="flex items-center gap-6">
-          <ul className="flex items-center gap-5 text-sm">
+        <span
+          aria-hidden="true"
+          className="mx-0.5 h-6 w-[1.5px] shrink-0 rounded-full bg-[#1e1e24]/15 dark:bg-[#d4d4dc]/20"
+        />
+
+        <nav aria-label="Primary" className="flex items-center gap-1 sm:gap-1.5">
+          <ul className="flex items-center gap-1 sm:gap-1.5">
             {NAV_ITEMS.map((item) => {
               const isActive = activeRoute === item.route;
               return (
@@ -36,26 +41,42 @@ export function Navbar({ theme, onToggleTheme, activeRoute }: NavbarProps) {
                   <a
                     href={item.href}
                     aria-current={isActive ? 'page' : undefined}
-                    className={`transition-colors ${
+                    className={`relative inline-flex items-center rounded-lg border px-2.5 py-1.5 pr-4 text-[15px] leading-none transition-colors sm:px-3.5 sm:pr-5 sm:text-base ${
                       isActive
-                        ? 'font-medium text-zinc-900 underline decoration-emerald-500 decoration-2 underline-offset-8 dark:text-zinc-100 dark:decoration-emerald-400'
-                        : 'text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100'
+                        ? 'border-[#6965db] bg-[#e0dfff] text-[#4a46b5] dark:border-[#a8a5ff] dark:bg-[#353263] dark:text-[#c5c3ff]'
+                        : 'border-transparent text-[var(--ink-muted)] hover:bg-[var(--surface-hover)] hover:text-[var(--ink)]'
                     }`}
                   >
-                    {item.label}
+                    <span>{item.label}</span>
+                    <span
+                      aria-hidden="true"
+                      className={`font-mono-label absolute right-1 bottom-0.5 text-[9px] leading-none ${
+                        isActive
+                          ? 'text-[#6965db] dark:text-[#c5c3ff]'
+                          : 'text-[var(--ink-muted)]/70'
+                      }`}
+                    >
+                      {item.shortcut}
+                    </span>
                   </a>
                 </li>
               );
             })}
           </ul>
 
+          <span
+            aria-hidden="true"
+            className="mx-0.5 h-6 w-[1.5px] shrink-0 rounded-full bg-[#1e1e24]/15 dark:bg-[#d4d4dc]/20"
+          />
+
           <button
             type="button"
             onClick={onToggleTheme}
             aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
-            className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-zinc-200 text-zinc-700 transition-colors hover:bg-zinc-100 dark:border-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-900"
+            title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+            className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-transparent text-[var(--ink)] transition-colors hover:border-[#1e1e24]/25 hover:bg-[var(--surface-hover)] sm:h-9 sm:w-9 dark:hover:border-[#d4d4dc]/25"
           >
-            {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+            {theme === 'dark' ? <Sun className="h-4 w-4 text-[#fde68a]" /> : <Moon className="h-4 w-4 text-[#6965db]" />}
           </button>
         </nav>
       </div>

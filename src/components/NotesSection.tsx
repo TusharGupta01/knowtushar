@@ -2,6 +2,13 @@ import { useState } from 'react';
 import { BookOpen, Clock, Database, Search, X } from 'lucide-react';
 import { useNotes, type NoteRecord } from '../hooks/useNotes';
 
+const PILL_VARIANTS = [
+  'sketch-pill-lavender',
+  'sketch-pill-mint',
+  'sketch-pill-yellow',
+  'sketch-pill-sky',
+] as const;
+
 export function NotesSection() {
   const [search, setSearch] = useState('');
   const [selectedTag, setSelectedTag] = useState<string | null>(null);
@@ -11,42 +18,46 @@ export function NotesSection() {
   const hasNotes = totalCount !== null && totalCount > 0;
   const hasActiveFilter = Boolean(search.trim() || selectedTag);
 
+  const sqliteBadge = (
+    <span className="sketch-pill sketch-pill-mint font-mono-label text-xs">
+      <Database className="h-3.5 w-3.5 shrink-0" />
+      <span>SQLite WASM{queryMs !== null ? ` · ${queryMs}ms` : ''}</span>
+    </span>
+  );
+
   return (
-    <section id="notes" className="py-14">
-      <div className="flex flex-wrap items-center justify-between gap-2">
+    <section id="notes" className="py-12 sm:py-14">
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h2 className="text-xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-50">
+          <h2 className="font-sketch text-4xl font-bold tracking-tight text-[var(--ink)]">
             Notes &amp; Writing
           </h2>
-          <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
+          <p className="mt-1 text-base text-[var(--ink-muted)]">
             Queried live in your browser from a bundled SQLite database.
           </p>
         </div>
 
-        <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-xs font-medium text-emerald-700 dark:border-emerald-900/70 dark:bg-emerald-950/60 dark:text-emerald-300">
-          <Database className="h-3.5 w-3.5" />
-          SQLite WASM{queryMs !== null ? ` · ${queryMs}ms` : ''}
-        </span>
+        {sqliteBadge}
       </div>
 
       {/* Search & tag filters */}
       {hasNotes && (
-        <div className="mt-6 space-y-3">
+        <div className="mt-6 space-y-3.5">
           <div className="relative">
-            <Search className="pointer-events-none absolute top-1/2 left-3.5 h-4 w-4 -translate-y-1/2 text-zinc-400" />
+            <Search className="pointer-events-none absolute top-1/2 left-3.5 h-4 w-4 -translate-y-1/2 text-[var(--ink-muted)]" />
             <input
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search notes (runs SQL LIKE query in-browser)..."
-              className="w-full rounded-lg border border-zinc-200 bg-white py-2.5 pr-9 pl-10 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-emerald-500 focus:outline-none dark:border-zinc-800 dark:bg-zinc-900/60 dark:text-zinc-100 dark:placeholder:text-zinc-500 dark:focus:border-emerald-500"
+              className="sketch-input w-full py-2.5 pr-9 pl-10 text-base placeholder:text-[var(--ink-muted)]/75"
             />
             {search && (
               <button
                 type="button"
                 onClick={() => setSearch('')}
                 aria-label="Clear search"
-                className="absolute top-1/2 right-2.5 -translate-y-1/2 rounded p-1 text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200"
+                className="absolute top-1/2 right-2.5 -translate-y-1/2 rounded p-1 text-[var(--ink-muted)] transition-colors hover:text-[var(--ink)]"
               >
                 <X className="h-4 w-4" />
               </button>
@@ -58,23 +69,23 @@ export function NotesSection() {
               <button
                 type="button"
                 onClick={() => setSelectedTag(null)}
-                className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
+                className={`sketch-pill cursor-pointer text-sm transition-transform hover:-translate-y-0.5 ${
                   selectedTag === null
-                    ? 'bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900'
-                    : 'bg-zinc-100 text-zinc-600 hover:bg-zinc-200 dark:bg-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800'
+                    ? 'border-[#6965db] bg-[#e0dfff] text-[#4a46b5] dark:border-[#a8a5ff] dark:bg-[#353263] dark:text-[#c5c3ff]'
+                    : 'border-[#1e1e24]/30 bg-[var(--surface-bg)] text-[var(--ink-muted)] dark:border-[#d4d4dc]/30'
                 }`}
               >
                 All
               </button>
-              {allTags.map((tag) => (
+              {allTags.map((tag, idx) => (
                 <button
                   key={tag}
                   type="button"
                   onClick={() => setSelectedTag(selectedTag === tag ? null : tag)}
-                  className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
+                  className={`sketch-pill cursor-pointer text-sm transition-transform hover:-translate-y-0.5 ${
                     selectedTag === tag
-                      ? 'bg-emerald-600 text-white dark:bg-emerald-500 dark:text-zinc-950'
-                      : 'bg-zinc-100 text-zinc-600 hover:bg-zinc-200 dark:bg-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800'
+                      ? 'border-[#6965db] bg-[#6965db] text-white dark:border-[#a8a5ff] dark:bg-[#a8a5ff] dark:text-[#121212]'
+                      : PILL_VARIANTS[idx % PILL_VARIANTS.length]
                   }`}
                 >
                   #{tag}
@@ -86,40 +97,83 @@ export function NotesSection() {
       )}
 
       {/* Results */}
-      <div className="mt-6 space-y-4">
+      <div className="mt-7 space-y-4">
         {error && (
-          <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700 dark:border-red-900/60 dark:bg-red-950/40 dark:text-red-300">
+          <div className="sketch-card border-red-500 bg-red-50 p-4 text-base text-red-800 dark:border-red-400 dark:bg-red-950/40 dark:text-red-200">
             Could not load SQLite database: {error}
           </div>
         )}
 
         {!error && loading && notes.length === 0 && (
-          <p className="py-8 text-center text-sm text-zinc-500">
+          <div className="sketch-card py-10 text-center text-base text-[var(--ink-muted)]">
             Initializing SQLite WebAssembly...
-          </p>
+          </div>
         )}
 
         {!error && !loading && notes.length === 0 && !hasActiveFilter && !hasNotes && (
-          <div className="rounded-xl border border-dashed border-zinc-200 px-6 py-14 text-center dark:border-zinc-800">
-            <p className="text-sm text-zinc-500 dark:text-zinc-400">
+          <div className="sketch-card flex flex-col items-center px-6 py-14 text-center">
+            {/* Hand-drawn notebook & pencil doodle */}
+            <svg
+              aria-hidden="true"
+              viewBox="0 0 96 80"
+              fill="none"
+              className="mb-4 h-16 w-20 text-[var(--ink)]"
+            >
+              {/* Notepad sheet */}
+              <path
+                d="M18 14C34 12.8 50 13.2 64 14.5C65.2 31 64.8 49 63.6 66C48 67.2 33 66.8 18.5 65.5C17.2 49 17.4 31 18 14Z"
+                stroke="currentColor"
+                strokeWidth="2.2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+              {/* Ruled sketch lines */}
+              <path
+                d="M27 28C36 27.4 45 27.5 54 28.2M27 39C35 38.6 43 38.7 51 39.2M27 50C33 49.7 39 49.8 45 50.2"
+                stroke="currentColor"
+                strokeWidth="1.8"
+                strokeLinecap="round"
+                opacity="0.55"
+              />
+              {/* Hand-drawn pencil in Excalidraw accent */}
+              <path
+                d="M57 56L79 25C80.5 22.8 83.4 22.4 85.4 24C87.4 25.5 87.7 28.5 86 30.7L64 61.5L54.5 64.5L57 56Z"
+                className="fill-[#e0dfff] stroke-[#6965db] dark:fill-[#353263] dark:stroke-[#a8a5ff]"
+                strokeWidth="2.2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+              <path
+                d="M75.5 30L82.5 35.2"
+                className="stroke-[#6965db] dark:stroke-[#a8a5ff]"
+                strokeWidth="1.8"
+                strokeLinecap="round"
+              />
+            </svg>
+
+            <h3 className="font-sketch text-2xl font-bold text-[var(--ink)]">
+              Blank canvas for now
+            </h3>
+            <p className="mt-1.5 max-w-md text-base text-[var(--ink-muted)]">
               Nothing published yet. Notes and writing will appear here as I add them.
             </p>
+            <div className="mt-5">{sqliteBadge}</div>
           </div>
         )}
 
         {!error && !loading && notes.length === 0 && (hasActiveFilter || hasNotes) && (
-          <p className="py-8 text-center text-sm text-zinc-500">
+          <div className="sketch-card py-10 text-center text-base text-[var(--ink-muted)]">
             No notes matched your query.
-          </p>
+          </div>
         )}
 
         {notes.map((note) => (
           <article
             key={note.id}
             onClick={() => setActiveNote(note)}
-            className="group cursor-pointer rounded-xl border border-zinc-200/90 bg-white p-5 transition-all hover:border-zinc-300 hover:shadow-sm dark:border-zinc-800/90 dark:bg-zinc-900/40 dark:hover:border-zinc-700"
+            className="sketch-card group cursor-pointer p-6 transition-transform duration-150 hover:-translate-y-0.5"
           >
-            <div className="flex flex-wrap items-center gap-3 text-xs text-zinc-500 dark:text-zinc-400">
+            <div className="font-mono-label flex flex-wrap items-center gap-3 text-xs text-[var(--ink-muted)]">
               <time>{note.published_at}</time>
               <span aria-hidden="true">·</span>
               <span className="inline-flex items-center gap-1">
@@ -128,26 +182,26 @@ export function NotesSection() {
               </span>
             </div>
 
-            <h3 className="mt-2 text-base font-semibold text-zinc-900 transition-colors group-hover:text-emerald-600 dark:text-zinc-100 dark:group-hover:text-emerald-400">
+            <h3 className="font-sketch mt-2 text-2xl font-bold text-[var(--ink)] transition-colors group-hover:text-[#6965db] dark:group-hover:text-[#a8a5ff]">
               {note.title}
             </h3>
 
-            <p className="mt-1.5 text-sm leading-6 text-zinc-600 dark:text-zinc-400">
+            <p className="mt-1.5 text-base leading-relaxed text-[var(--ink-muted)]">
               {note.summary}
             </p>
 
             <div className="mt-4 flex items-center justify-between gap-2">
               <div className="flex flex-wrap gap-1.5">
-                {note.tags.map((tag) => (
+                {note.tags.map((tag, idx) => (
                   <span
                     key={tag}
-                    className="rounded bg-zinc-100 px-2 py-0.5 text-xs text-zinc-600 dark:bg-zinc-800/90 dark:text-zinc-300"
+                    className={`sketch-pill ${PILL_VARIANTS[idx % PILL_VARIANTS.length]} text-xs`}
                   >
                     #{tag}
                   </span>
                 ))}
               </div>
-              <span className="inline-flex items-center gap-1 text-xs font-medium text-emerald-600 dark:text-emerald-400">
+              <span className="inline-flex items-center gap-1 text-sm font-medium text-[#6965db] dark:text-[#a8a5ff]">
                 <BookOpen className="h-3.5 w-3.5" />
                 Read
               </span>
@@ -163,22 +217,22 @@ export function NotesSection() {
           aria-modal="true"
           aria-labelledby="note-modal-title"
           onClick={() => setActiveNote(null)}
-          className="fixed inset-0 z-50 flex items-center justify-center bg-zinc-950/60 p-4 backdrop-blur-xs"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-[#121212]/60 p-4 backdrop-blur-xs"
         >
           <div
             onClick={(e) => e.stopPropagation()}
-            className="max-h-[85vh] w-full max-w-2xl overflow-y-auto rounded-2xl border border-zinc-200 bg-white p-6 shadow-xl sm:p-8 dark:border-zinc-800 dark:bg-zinc-950"
+            className="sketch-card max-h-[85vh] w-full max-w-2xl overflow-y-auto p-6 sm:p-8"
           >
             <div className="flex items-start justify-between gap-4">
               <div>
-                <div className="flex items-center gap-2 text-xs text-zinc-500">
+                <div className="font-mono-label flex items-center gap-2 text-xs text-[var(--ink-muted)]">
                   <time>{activeNote.published_at}</time>
                   <span>·</span>
                   <span>{activeNote.reading_minutes} min read</span>
                 </div>
                 <h3
                   id="note-modal-title"
-                  className="mt-2 text-xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50"
+                  className="font-sketch mt-2 text-3xl font-bold tracking-tight text-[var(--ink)]"
                 >
                   {activeNote.title}
                 </h3>
@@ -188,21 +242,21 @@ export function NotesSection() {
                 type="button"
                 onClick={() => setActiveNote(null)}
                 aria-label="Close note"
-                className="rounded-lg p-1.5 text-zinc-500 transition-colors hover:bg-zinc-100 hover:text-zinc-900 dark:hover:bg-zinc-900 dark:hover:text-zinc-100"
+                className="sketch-btn inline-flex h-9 w-9 shrink-0 items-center justify-center"
               >
-                <X className="h-5 w-5" />
+                <X className="h-4 w-4" />
               </button>
             </div>
 
-            <div className="mt-6 space-y-4 text-sm leading-7 whitespace-pre-line text-zinc-700 dark:text-zinc-300">
+            <div className="mt-6 space-y-4 text-[17px] leading-relaxed whitespace-pre-line text-[var(--ink)]/90">
               {activeNote.body}
             </div>
 
-            <div className="mt-6 flex flex-wrap gap-2 border-t border-zinc-200 pt-4 dark:border-zinc-800">
-              {activeNote.tags.map((tag) => (
+            <div className="mt-6 flex flex-wrap gap-2 border-t border-dashed border-[#1e1e24]/25 pt-4 dark:border-[#d4d4dc]/25">
+              {activeNote.tags.map((tag, idx) => (
                 <span
                   key={tag}
-                  className="rounded bg-zinc-100 px-2.5 py-0.5 text-xs text-zinc-600 dark:bg-zinc-900 dark:text-zinc-400"
+                  className={`sketch-pill ${PILL_VARIANTS[idx % PILL_VARIANTS.length]} text-xs`}
                 >
                   #{tag}
                 </span>
