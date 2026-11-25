@@ -13,6 +13,7 @@ const NAV_ITEMS: { label: string; href: string; route: PageRoute; shortcut: stri
   { label: 'Intro', href: '#/', route: 'intro', shortcut: '1' },
   { label: 'Experience', href: '#/experience', route: 'experience', shortcut: '2' },
   { label: 'Notes', href: '#/notes', route: 'notes', shortcut: '3' },
+  { label: 'TIL', href: '#/til', route: 'til', shortcut: '4' },
 ];
 
 export function Navbar({ theme, onToggleTheme, activeRoute }: NavbarProps) {

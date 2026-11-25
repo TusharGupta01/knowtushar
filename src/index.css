@@ -65,8 +65,35 @@
   font-family: 'Patrick Hand', cursive, sans-serif;
 }
 
+.font-excali {
+  font-family: 'Kalam', 'Patrick Hand', cursive, sans-serif;
+}
+
 .font-mono-label {
   font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+.excali-paper {
+  background-color: #ffffff;
+  color: #1e1e24;
+  border-radius: 14px 20px 16px 18px / 18px 14px 20px 16px;
+  border: 1.75px solid var(--ink-border);
+  box-shadow: 4px 4px 0px var(--shadow-color);
+}
+
+.dark .excali-paper {
+  background-color: #16161a;
+  color: #ececf2;
+}
+
+.excali-paper-grid {
+  background-image: radial-gradient(rgba(30, 30, 36, 0.13) 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+
+.dark .excali-paper-grid {
+  background-image: radial-gradient(rgba(236, 236, 242, 0.12) 1px, transparent 1px);
+  background-size: 20px 20px;
 }
 
 .sketch-card {
