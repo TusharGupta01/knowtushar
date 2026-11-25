@@ -17,9 +17,14 @@ export interface ExperienceItem {
 export const PROFILE = {
   name: 'Tushar Gupta',
   handle: 'knowtushar',
-  headline: '',
+  headline:
+    'I care about the mind, the body, and how much further humans can go when they actually test their limits.',
   location: 'Bengaluru / Remote',
-  about: [] as string[],
+  about: [
+    'A lot of my days are small experiments on myself. Working out, running (20-minute 5K, 47-minute 10K so far), meditation, and breathing techniques. Right now I am following a strict low-GI diet: no milk, soy, meat, eggs, sugar, or high-GI fruits like watermelon. I like noticing what changes when you treat health, energy, and attention as things you can train.',
+    'The other half is learning. Education should be a basic right, and forcing everyone through the same rigid syllabus feels archaic. Every kid thinks differently and moves at a different pace. I want to build personal AI that maps how an individual learns and adapts to them.',
+    'Looking ahead, I believe the next real breakthroughs will happen in personal AI and robotics. Tools that stay close to everyday human life and help people grow beyond what they thought was possible.',
+  ],
   socials: [
     {
       label: 'GitHub',
