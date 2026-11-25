@@ -1,4 +1,4 @@
-import { Github, Globe, Linkedin, Mail, MapPin } from 'lucide-react';
+import { Github, Globe, Linkedin, Mail } from 'lucide-react';
 import { PROFILE, type SocialLink } from '../data/profile';
 
 function SocialIcon({ kind }: { kind: SocialLink['kind'] }) {
@@ -42,12 +42,7 @@ export function HeroAbout() {
           <circle cx="16" cy="48" r="2" fill="currentColor" />
         </svg>
 
-        <div className="sketch-pill sketch-pill-lavender font-mono-label text-xs">
-          <MapPin className="h-3.5 w-3.5 shrink-0" />
-          <span>{PROFILE.location}</span>
-        </div>
-
-        <div className="mt-6 inline-block max-w-full">
+        <div className="inline-block max-w-full">
           <h1 className="font-sketch text-5xl leading-none font-bold tracking-tight text-[var(--ink)] sm:text-6xl">
             {PROFILE.name}
           </h1>

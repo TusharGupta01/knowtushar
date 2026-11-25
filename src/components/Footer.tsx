@@ -9,10 +9,6 @@ export function Footer() {
         <span>
           © {year} {PROFILE.name}
         </span>
-        <span aria-hidden="true" className="text-[#6965db] dark:text-[#a8a5ff]">
-          ·
-        </span>
-        <span>Static S3 · SQLite WASM</span>
       </div>
     </footer>
   );

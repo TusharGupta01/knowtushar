@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { BookOpen, Clock, Database, Search, X } from 'lucide-react';
+import { BookOpen, Clock, Search, X } from 'lucide-react';
 import { useNotes, type NoteRecord } from '../hooks/useNotes';
 
 const PILL_VARIANTS = [
@@ -14,16 +14,9 @@ export function NotesSection() {
   const [selectedTag, setSelectedTag] = useState<string | null>(null);
   const [activeNote, setActiveNote] = useState<NoteRecord | null>(null);
 
-  const { notes, allTags, totalCount, loading, error, queryMs } = useNotes(search, selectedTag);
+  const { notes, allTags, totalCount, loading, error } = useNotes(search, selectedTag);
   const hasNotes = totalCount !== null && totalCount > 0;
   const hasActiveFilter = Boolean(search.trim() || selectedTag);
-
-  const sqliteBadge = (
-    <span className="sketch-pill sketch-pill-mint font-mono-label text-xs">
-      <Database className="h-3.5 w-3.5 shrink-0" />
-      <span>SQLite WASM{queryMs !== null ? ` · ${queryMs}ms` : ''}</span>
-    </span>
-  );
 
   return (
     <section id="notes" className="py-12 sm:py-14">
@@ -33,11 +26,9 @@ export function NotesSection() {
             Notes &amp; Writing
           </h2>
           <p className="mt-1 text-base text-[var(--ink-muted)]">
-            Queried live in your browser from a bundled SQLite database.
+            Essays, technical notes, and things worth writing down.
           </p>
         </div>
-
-        {sqliteBadge}
       </div>
 
       {/* Search & tag filters */}
@@ -49,7 +40,7 @@ export function NotesSection() {
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search notes (runs SQL LIKE query in-browser)..."
+              placeholder="Search notes..."
               className="sketch-input w-full py-2.5 pr-9 pl-10 text-base placeholder:text-[var(--ink-muted)]/75"
             />
             {search && (
@@ -106,7 +97,7 @@ export function NotesSection() {
 
         {!error && loading && notes.length === 0 && (
           <div className="sketch-card py-10 text-center text-base text-[var(--ink-muted)]">
-            Initializing SQLite WebAssembly...
+            Loading notes...
           </div>
         )}
 
@@ -157,7 +148,6 @@ export function NotesSection() {
             <p className="mt-1.5 max-w-md text-base text-[var(--ink-muted)]">
               Nothing published yet. Notes and writing will appear here as I add them.
             </p>
-            <div className="mt-5">{sqliteBadge}</div>
           </div>
         )}
 

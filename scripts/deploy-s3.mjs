@@ -53,6 +53,17 @@ run('aws', [
 run('aws', [
   's3',
   'cp',
+  'dist/Tushar_Gupta_Resume.pdf',
+  `s3://${bucket}/Tushar_Gupta_Resume.pdf`,
+  '--cache-control',
+  'public, max-age=300',
+  '--content-type',
+  'application/pdf',
+]);
+
+run('aws', [
+  's3',
+  'cp',
   'dist/index.html',
   `s3://${bucket}/index.html`,
   '--cache-control',
@@ -71,6 +82,7 @@ if (distributionId) {
     '--paths',
     '/index.html',
     '/data/*',
+    '/Tushar_Gupta_Resume.pdf',
   ]);
 }
 
