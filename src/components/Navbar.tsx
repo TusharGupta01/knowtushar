@@ -1,6 +1,7 @@
+import type { MouseEvent } from 'react';
 import { Moon, Sun } from 'lucide-react';
 import type { Theme } from '../hooks/useTheme';
-import type { PageRoute } from '../App';
+import { navigateTo, type PageRoute } from '../lib/router';
 import { PROFILE } from '../data/profile';
 
 interface NavbarProps {
@@ -10,18 +11,27 @@ interface NavbarProps {
 }
 
 const NAV_ITEMS: { label: string; href: string; route: PageRoute; shortcut: string }[] = [
-  { label: 'Intro', href: '#/', route: 'intro', shortcut: '1' },
-  { label: 'Experience', href: '#/experience', route: 'experience', shortcut: '2' },
-  { label: 'Notes', href: '#/notes', route: 'notes', shortcut: '3' },
-  { label: 'TIL', href: '#/til', route: 'til', shortcut: '4' },
+  { label: 'Intro', href: '/', route: 'intro', shortcut: '1' },
+  { label: 'Experience', href: '/experience', route: 'experience', shortcut: '2' },
+  { label: 'Notes', href: '/notes', route: 'notes', shortcut: '3' },
+  { label: 'TIL', href: '/til', route: 'til', shortcut: '4' },
 ];
+
+function handleNavClick(e: MouseEvent<HTMLAnchorElement>, href: string) {
+  if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) {
+    return;
+  }
+  e.preventDefault();
+  navigateTo(href);
+}
 
 export function Navbar({ theme, onToggleTheme, activeRoute }: NavbarProps) {
   return (
     <header className="sticky top-4 z-30 px-4 sm:px-6">
       <div className="sketch-toolbar mx-auto flex w-fit max-w-full items-center gap-1.5 px-3 py-1.5 sm:gap-2 sm:px-3.5 sm:py-2">
         <a
-          href="#/"
+          href="/"
+          onClick={(e) => handleNavClick(e, '/')}
           className="font-sketch px-1.5 text-xl font-bold tracking-tight text-[var(--ink)] transition-opacity hover:opacity-80 sm:text-2xl"
         >
           {PROFILE.handle}
@@ -41,6 +51,7 @@ export function Navbar({ theme, onToggleTheme, activeRoute }: NavbarProps) {
                 <li key={item.href}>
                   <a
                     href={item.href}
+                    onClick={(e) => handleNavClick(e, item.href)}
                     aria-current={isActive ? 'page' : undefined}
                     className={`relative inline-flex items-center rounded-lg border px-2.5 py-1.5 pr-4 text-[15px] leading-none transition-colors sm:px-3.5 sm:pr-5 sm:text-base ${
                       isActive
@@ -77,7 +88,11 @@ export function Navbar({ theme, onToggleTheme, activeRoute }: NavbarProps) {
             title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
             className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-transparent text-[var(--ink)] transition-colors hover:border-[#1e1e24]/25 hover:bg-[var(--surface-hover)] sm:h-9 sm:w-9 dark:hover:border-[#d4d4dc]/25"
           >
-            {theme === 'dark' ? <Sun className="h-4 w-4 text-[#fde68a]" /> : <Moon className="h-4 w-4 text-[#6965db]" />}
+            {theme === 'dark' ? (
+              <Sun className="h-4 w-4 text-[#fde68a]" />
+            ) : (
+              <Moon className="h-4 w-4 text-[#6965db]" />
+            )}
           </button>
         </nav>
       </div>

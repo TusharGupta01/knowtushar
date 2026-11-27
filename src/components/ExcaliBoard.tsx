@@ -18,6 +18,7 @@ import { formatTilDate } from '../data/til';
 interface ExcaliBoardProps {
   entry: TilEntry;
   compactHeader?: boolean;
+  headingAsH1?: boolean;
 }
 
 const TONE_FILL: Record<SketchTone, string> = {
@@ -564,7 +565,11 @@ function getSplitGridClass(split?: TilSection['split']) {
 
 const ZOOM_STEPS = [85, 100, 115] as const;
 
-export function ExcaliBoard({ entry, compactHeader = false }: ExcaliBoardProps) {
+export function ExcaliBoard({
+  entry,
+  compactHeader = false,
+  headingAsH1 = false,
+}: ExcaliBoardProps) {
   const [showGrid, setShowGrid] = useState(false);
   const [monoCode, setMonoCode] = useState(false);
   const [zoomIdx, setZoomIdx] = useState(1);
@@ -584,7 +589,7 @@ export function ExcaliBoard({ entry, compactHeader = false }: ExcaliBoardProps) 
   }, [expanded]);
 
   const handleCopyPermalink = async () => {
-    const url = `${window.location.origin}${window.location.pathname}#/til/${entry.id}`;
+    const url = `${window.location.origin}/til/${entry.slug}`;
     try {
       await navigator.clipboard.writeText(url);
       setLinkCopied(true);
@@ -611,11 +616,16 @@ export function ExcaliBoard({ entry, compactHeader = false }: ExcaliBoardProps) 
             <span>{formatTilDate(entry.date)}</span>
           </time>
 
-          {!compactHeader && (
-            <h3 className="font-sketch text-2xl leading-tight font-bold text-[var(--ink)]">
-              {entry.title}
-            </h3>
-          )}
+          {!compactHeader &&
+            (headingAsH1 ? (
+              <h1 className="font-sketch text-2xl leading-tight font-bold text-[var(--ink)]">
+                {entry.title}
+              </h1>
+            ) : (
+              <h2 className="font-sketch text-2xl leading-tight font-bold text-[var(--ink)]">
+                {entry.title}
+              </h2>
+            ))}
         </div>
 
         {/* Whiteboard tools */}

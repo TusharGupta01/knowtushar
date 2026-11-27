@@ -90,6 +90,7 @@ export interface TilSection {
 
 export interface TilEntry {
   id: string;
+  slug: string;
   date: string;
   title: string;
   summary: string;

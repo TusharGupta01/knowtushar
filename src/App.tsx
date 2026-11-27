@@ -6,56 +6,63 @@ import { Experience } from './components/Experience';
 import { NotesSection } from './components/NotesSection';
 import { TilSection } from './components/TilSection';
 import { Footer } from './components/Footer';
+import { navigateTo, parseRoute, type PageRoute, type ParsedRoute } from './lib/router';
+import { applyDocumentSeo, findTilBySlugOrId, getRouteSeo } from './lib/seo';
 
-export type PageRoute = 'intro' | 'experience' | 'notes' | 'til';
+export type { PageRoute };
 
-interface ParsedRoute {
-  page: PageRoute;
-  tilId: string | null;
-}
-
-function parseHashRoute(hash: string): ParsedRoute {
-  const normalized = hash.replace(/^#/, '').replace(/\/+$/, '');
-  const lower = normalized.toLowerCase();
-
-  if (lower === '/experience' || lower === 'experience') {
-    return { page: 'experience', tilId: null };
-  }
-  if (lower === '/notes' || lower === 'notes') {
-    return { page: 'notes', tilId: null };
-  }
-  if (lower === '/til' || lower === 'til') {
-    return { page: 'til', tilId: null };
-  }
-  const tilMatch = normalized.match(/^\/?til\/(.+)$/i);
-  if (tilMatch) {
-    return { page: 'til', tilId: decodeURIComponent(tilMatch[1]) };
-  }
-  return { page: 'intro', tilId: null };
-}
-
-const SHORTCUT_HASH: Record<string, string> = {
-  '1': '#/',
-  '2': '#/experience',
-  '3': '#/notes',
-  '4': '#/til',
+const SHORTCUT_PATH: Record<string, string> = {
+  '1': '/',
+  '2': '/experience',
+  '3': '/notes',
+  '4': '/til',
 };
 
-export function App() {
+interface AppProps {
+  initialPath?: string;
+}
+
+export function App({ initialPath }: AppProps) {
   const { theme, toggleTheme } = useTheme();
-  const [parsedRoute, setParsedRoute] = useState<ParsedRoute>(() =>
-    parseHashRoute(window.location.hash),
-  );
+  const [parsedRoute, setParsedRoute] = useState<ParsedRoute>(() => {
+    if (initialPath) return parseRoute(initialPath);
+    if (typeof window === 'undefined') return { page: 'intro', tilSlug: null };
+    return parseRoute(window.location.pathname, window.location.hash);
+  });
+
+  // Redirect legacy hash routes (#/til, #/experience, etc.) to clean path URLs
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    if (window.location.hash && window.location.hash.startsWith('#/')) {
+      const legacy = parseRoute('/', window.location.hash);
+      if (legacy.page === 'til' && legacy.tilSlug) {
+        const entry = findTilBySlugOrId(legacy.tilSlug);
+        navigateTo(entry ? `/til/${entry.slug}` : '/til', true);
+      } else if (legacy.page !== 'intro') {
+        navigateTo(`/${legacy.page}`, true);
+      } else {
+        navigateTo('/', true);
+      }
+    }
+  }, []);
 
   useEffect(() => {
-    const handleHashChange = () => {
-      setParsedRoute(parseHashRoute(window.location.hash));
+    const syncFromLocation = () => {
+      setParsedRoute(parseRoute(window.location.pathname, window.location.hash));
       window.scrollTo({ top: 0, behavior: 'instant' });
     };
 
-    window.addEventListener('hashchange', handleHashChange);
-    return () => window.removeEventListener('hashchange', handleHashChange);
+    window.addEventListener('popstate', syncFromLocation);
+    window.addEventListener('hashchange', syncFromLocation);
+    return () => {
+      window.removeEventListener('popstate', syncFromLocation);
+      window.removeEventListener('hashchange', syncFromLocation);
+    };
   }, []);
+
+  useEffect(() => {
+    applyDocumentSeo(getRouteSeo(parsedRoute));
+  }, [parsedRoute]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -69,9 +76,9 @@ export function App() {
       ) {
         return;
       }
-      const nextHash = SHORTCUT_HASH[e.key];
-      if (nextHash && window.location.hash !== nextHash) {
-        window.location.hash = nextHash;
+      const nextPath = SHORTCUT_PATH[e.key];
+      if (nextPath) {
+        navigateTo(nextPath);
       }
     };
 
@@ -92,7 +99,7 @@ export function App() {
         {route === 'intro' && <HeroAbout />}
         {route === 'experience' && <Experience />}
         {route === 'notes' && <NotesSection />}
-        {route === 'til' && <TilSection initialEntryId={parsedRoute.tilId} />}
+        {route === 'til' && <TilSection initialEntrySlug={parsedRoute.tilSlug} />}
       </main>
       <Footer />
     </div>

@@ -37,7 +37,7 @@ run('aws', [
   'application/wasm',
 ]);
 
-// SQLite DB & root HTML: short cache so updates appear quickly
+// SQLite DB: short cache so updates appear quickly
 run('aws', [
   's3',
   'sync',
@@ -50,6 +50,7 @@ run('aws', [
   'application/vnd.sqlite3',
 ]);
 
+// Resume PDF
 run('aws', [
   's3',
   'cp',
@@ -60,6 +61,55 @@ run('aws', [
   '--content-type',
   'application/pdf',
 ]);
+
+// SEO files: sitemap.xml, robots.txt, feed.xml
+run('aws', [
+  's3',
+  'cp',
+  'dist/sitemap.xml',
+  `s3://${bucket}/sitemap.xml`,
+  '--cache-control',
+  'public, max-age=300',
+  '--content-type',
+  'application/xml; charset=utf-8',
+]);
+
+run('aws', [
+  's3',
+  'cp',
+  'dist/robots.txt',
+  `s3://${bucket}/robots.txt`,
+  '--cache-control',
+  'public, max-age=300',
+  '--content-type',
+  'text/plain; charset=utf-8',
+]);
+
+run('aws', [
+  's3',
+  'cp',
+  'dist/feed.xml',
+  `s3://${bucket}/feed.xml`,
+  '--cache-control',
+  'public, max-age=300',
+  '--content-type',
+  'application/rss+xml; charset=utf-8',
+]);
+
+// Prerendered HTML pages (root + /experience + /notes + /til + /til/<slug>)
+for (const dir of ['experience', 'notes', 'til']) {
+  run('aws', [
+    's3',
+    'sync',
+    `dist/${dir}`,
+    `s3://${bucket}/${dir}`,
+    '--delete',
+    '--cache-control',
+    'no-cache, no-store, must-revalidate',
+    '--content-type',
+    'text/html; charset=utf-8',
+  ]);
+}
 
 run('aws', [
   's3',
@@ -81,6 +131,12 @@ if (distributionId) {
     distributionId,
     '--paths',
     '/index.html',
+    '/experience/*',
+    '/notes/*',
+    '/til/*',
+    '/sitemap.xml',
+    '/robots.txt',
+    '/feed.xml',
     '/data/*',
     '/Tushar_Gupta_Resume.pdf',
   ]);

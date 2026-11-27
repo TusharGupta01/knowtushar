@@ -2,6 +2,7 @@ import type { TilEntry } from '../../types/til';
 
 export const til20261125: TilEntry = {
   id: '2026-11-25',
+  slug: '2026-11-25-tokenizer-bpe-training-flops-gpu-memory',
   date: '2026-11-25',
   title: 'Tokenizer (BPE), Training FLOPs & GPU Memory',
   summary:

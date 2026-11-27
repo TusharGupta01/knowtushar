@@ -1,10 +1,12 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, type MouseEvent } from 'react';
 import { Calendar, ChevronLeft, ChevronRight, PenLine, Search, X } from 'lucide-react';
 import { TIL_ENTRIES, extractTilSearchText, formatTilDate } from '../data/til';
+import { navigateTo } from '../lib/router';
+import { findTilBySlugOrId } from '../lib/seo';
 import { ExcaliBoard } from './ExcaliBoard';
 
 interface TilSectionProps {
-  initialEntryId?: string | null;
+  initialEntrySlug?: string | null;
 }
 
 const PILL_VARIANTS = [
@@ -14,21 +16,22 @@ const PILL_VARIANTS = [
   'sketch-pill-sky',
 ] as const;
 
-export function TilSection({ initialEntryId }: TilSectionProps) {
+export function TilSection({ initialEntrySlug }: TilSectionProps) {
   const [search, setSearch] = useState('');
   const [selectedTag, setSelectedTag] = useState<string | null>(null);
-  const [activeId, setActiveId] = useState<string>(
-    () =>
-      (initialEntryId && TIL_ENTRIES.some((e) => e.id === initialEntryId)
-        ? initialEntryId
-        : TIL_ENTRIES[0]?.id) ?? '',
-  );
+  const [activeSlug, setActiveSlug] = useState<string>(() => {
+    const matched = findTilBySlugOrId(initialEntrySlug);
+    return (matched ?? TIL_ENTRIES[0])?.slug ?? '';
+  });
+
+  const isDedicatedEntryPage = Boolean(findTilBySlugOrId(initialEntrySlug));
 
   useEffect(() => {
-    if (initialEntryId && TIL_ENTRIES.some((e) => e.id === initialEntryId)) {
-      setActiveId(initialEntryId);
+    const matched = findTilBySlugOrId(initialEntrySlug);
+    if (matched) {
+      setActiveSlug(matched.slug);
     }
-  }, [initialEntryId]);
+  }, [initialEntrySlug]);
 
   const allTags = useMemo(() => {
     const set = new Set<string>();
@@ -41,7 +44,7 @@ export function TilSection({ initialEntryId }: TilSectionProps) {
   }, []);
 
   const searchIndex = useMemo(
-    () => new Map(TIL_ENTRIES.map((entry) => [entry.id, extractTilSearchText(entry)])),
+    () => new Map(TIL_ENTRIES.map((entry) => [entry.slug, extractTilSearchText(entry)])),
     [],
   );
 
@@ -49,26 +52,29 @@ export function TilSection({ initialEntryId }: TilSectionProps) {
     const q = search.trim().toLowerCase();
     return TIL_ENTRIES.filter((entry) => {
       if (selectedTag && !entry.tags.includes(selectedTag)) return false;
-      if (q && !(searchIndex.get(entry.id) ?? '').includes(q)) return false;
+      if (q && !(searchIndex.get(entry.slug) ?? '').includes(q)) return false;
       return true;
     });
   }, [search, selectedTag, searchIndex]);
 
   const activeEntry = useMemo(() => {
     if (filteredEntries.length === 0) return null;
-    return filteredEntries.find((e) => e.id === activeId) ?? filteredEntries[0];
-  }, [filteredEntries, activeId]);
+    return filteredEntries.find((e) => e.slug === activeSlug) ?? filteredEntries[0];
+  }, [filteredEntries, activeSlug]);
 
   const activeIndex = activeEntry
-    ? filteredEntries.findIndex((e) => e.id === activeEntry.id)
+    ? filteredEntries.findIndex((e) => e.slug === activeEntry.slug)
     : -1;
 
-  const selectEntry = (id: string) => {
-    setActiveId(id);
-    const targetHash = `#/til/${id}`;
-    if (window.location.hash !== targetHash) {
-      window.history.replaceState(null, '', targetHash);
+  const selectEntry = (slug: string, e?: MouseEvent<HTMLAnchorElement>) => {
+    if (e) {
+      if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) {
+        return;
+      }
+      e.preventDefault();
     }
+    setActiveSlug(slug);
+    navigateTo(`/til/${slug}`);
   };
 
   return (
@@ -76,9 +82,15 @@ export function TilSection({ initialEntryId }: TilSectionProps) {
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h2 className="font-sketch text-4xl font-bold tracking-tight text-[var(--ink)]">
-            TIL — Today I Learned
-          </h2>
+          {isDedicatedEntryPage ? (
+            <p className="font-sketch text-3xl font-bold tracking-tight text-[var(--ink)]">
+              TIL — Today I Learned
+            </p>
+          ) : (
+            <h1 className="font-sketch text-4xl font-bold tracking-tight text-[var(--ink)]">
+              TIL — Today I Learned
+            </h1>
+          )}
           <p className="mt-1 text-base text-[var(--ink-muted)]">
             Rough whiteboard notes by date — Excalidraw style, rendered as crisp selectable text.
           </p>
@@ -146,24 +158,19 @@ export function TilSection({ initialEntryId }: TilSectionProps) {
         )}
       </div>
 
-      {/* Date timeline / board switcher */}
+      {/* Date timeline / board switcher (real <a> links for crawlers) */}
       {filteredEntries.length > 0 && (
         <div className="mt-6 flex flex-wrap items-center justify-between gap-3">
-          <div
-            role="tablist"
-            aria-label="TIL dates"
-            className="flex flex-wrap items-center gap-2"
-          >
+          <nav aria-label="TIL dates" className="flex flex-wrap items-center gap-2">
             {filteredEntries.map((entry) => {
-              const isSelected = activeEntry?.id === entry.id;
+              const isSelected = activeEntry?.slug === entry.slug;
               return (
-                <button
-                  key={entry.id}
-                  role="tab"
-                  aria-selected={isSelected}
-                  type="button"
-                  onClick={() => selectEntry(entry.id)}
-                  className={`sketch-btn inline-flex cursor-pointer items-center gap-2 px-3 py-1.5 text-sm ${
+                <a
+                  key={entry.slug}
+                  href={`/til/${entry.slug}`}
+                  aria-current={isSelected ? 'page' : undefined}
+                  onClick={(e) => selectEntry(entry.slug, e)}
+                  className={`sketch-btn inline-flex items-center gap-2 px-3 py-1.5 text-sm ${
                     isSelected
                       ? 'border-[#6965db] bg-[#e0dfff] text-[#4a46b5] dark:border-[#a8a5ff] dark:bg-[#353263] dark:text-[#c5c3ff]'
                       : ''
@@ -173,17 +180,17 @@ export function TilSection({ initialEntryId }: TilSectionProps) {
                   <span className="font-mono-label text-xs">{formatTilDate(entry.date)}</span>
                   <span className="hidden text-[var(--ink-muted)] sm:inline">·</span>
                   <span className="hidden max-w-[220px] truncate sm:inline">{entry.title}</span>
-                </button>
+                </a>
               );
             })}
-          </div>
+          </nav>
 
           {filteredEntries.length > 1 && activeIndex !== -1 && (
             <div className="font-mono-label flex items-center gap-1.5 text-xs">
               <button
                 type="button"
                 disabled={activeIndex === 0}
-                onClick={() => selectEntry(filteredEntries[activeIndex - 1].id)}
+                onClick={() => selectEntry(filteredEntries[activeIndex - 1].slug)}
                 className="sketch-btn inline-flex cursor-pointer items-center gap-1 px-2.5 py-1 disabled:cursor-not-allowed disabled:opacity-40"
               >
                 <ChevronLeft className="h-3.5 w-3.5" />
@@ -192,7 +199,7 @@ export function TilSection({ initialEntryId }: TilSectionProps) {
               <button
                 type="button"
                 disabled={activeIndex === filteredEntries.length - 1}
-                onClick={() => selectEntry(filteredEntries[activeIndex + 1].id)}
+                onClick={() => selectEntry(filteredEntries[activeIndex + 1].slug)}
                 className="sketch-btn inline-flex cursor-pointer items-center gap-1 px-2.5 py-1 disabled:cursor-not-allowed disabled:opacity-40"
               >
                 <span>Older</span>
@@ -206,7 +213,7 @@ export function TilSection({ initialEntryId }: TilSectionProps) {
       {/* Active Excalidraw Text Board */}
       <div className="mt-6">
         {activeEntry ? (
-          <ExcaliBoard entry={activeEntry} />
+          <ExcaliBoard entry={activeEntry} headingAsH1={isDedicatedEntryPage} />
         ) : (
           <div className="sketch-card py-12 text-center text-base text-[var(--ink-muted)]">
             No TIL boards matched your search.
