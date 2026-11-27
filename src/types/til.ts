@@ -70,6 +70,21 @@ export type TilBlock =
       maxWidth?: number;
     }
   | {
+      type: 'diagram';
+      kind: 'pre-vs-post-ln';
+      caption?: string;
+    }
+  | {
+      type: 'math';
+      lead?: string;
+      highlight?: string;
+      description?: string;
+      lhs: string;
+      numerator: string;
+      denominator: string;
+      suffix?: string;
+    }
+  | {
       type: 'callout';
       label?: string;
       lines: string[];

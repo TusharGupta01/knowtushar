@@ -341,6 +341,390 @@ function ImageSketchBlock({
   );
 }
 
+function PreVsPostLnDiagram({ caption }: { caption?: string }) {
+  return (
+    <figure className="rounded-xl border border-dashed border-[#1e1e24]/20 bg-[#faf9f5]/80 p-4 dark:border-[#d4d4dc]/20 dark:bg-[#1c1c22]/80">
+      <svg
+        viewBox="0 0 430 330"
+        className="mx-auto h-auto w-full max-w-[420px] text-[var(--ink)]"
+        role="img"
+        aria-label="Post-LN versus Pre-LN Transformer residual stream diagram"
+      >
+        <defs>
+          <marker
+            id="til-arrow"
+            viewBox="0 0 10 10"
+            refX="8"
+            refY="5"
+            markerWidth="6"
+            markerHeight="6"
+            orient="auto-start-reverse"
+          >
+            <path d="M 0 1.5 L 9 5 L 0 8.5 z" fill="currentColor" />
+          </marker>
+        </defs>
+
+        {/* Column headers */}
+        <text
+          x="98"
+          y="16"
+          textAnchor="middle"
+          fontSize="12"
+          fontWeight="700"
+          fill="currentColor"
+          opacity="0.7"
+        >
+          Post-LN (Original)
+        </text>
+        <text
+          x="306"
+          y="16"
+          textAnchor="middle"
+          fontSize="12"
+          fontWeight="700"
+          fill="currentColor"
+          opacity="0.7"
+        >
+          Pre-LN (Modern)
+        </text>
+
+        {/* === LEFT: POST-LN === */}
+        {/* Residual highway */}
+        <path
+          d="M 62 308 L 62 46 L 48 46 L 72 24 L 96 46 L 82 46 L 82 308 Z"
+          className="fill-[#e6d5c3] dark:fill-[#3b332b]"
+        />
+        <line
+          x1="72"
+          y1="296"
+          x2="72"
+          y2="46"
+          stroke="currentColor"
+          strokeWidth="1.5"
+          markerEnd="url(#til-arrow)"
+        />
+        <text x="72" y="320" textAnchor="middle" fontSize="13" fontStyle="italic" fill="currentColor">
+          xₗ
+        </text>
+        <text x="72" y="40" textAnchor="middle" fontSize="13" fontStyle="italic" fill="currentColor">
+          xₗ₊₁
+        </text>
+
+        {/* Branch 1: Multi-Head Attention */}
+        <path
+          d="M 72 282 L 146 266 L 146 254"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.4"
+          markerEnd="url(#til-arrow)"
+        />
+        <rect
+          x="108"
+          y="220"
+          width="76"
+          height="32"
+          rx="4"
+          className="fill-[#fde68a] stroke-[#1e1e24] dark:fill-[#715b16] dark:stroke-[#d4d4dc]"
+          strokeWidth="1.4"
+        />
+        <text x="146" y="234" textAnchor="middle" fontSize="10.5" fill="currentColor">
+          Multi-Head
+        </text>
+        <text x="146" y="246" textAnchor="middle" fontSize="10.5" fill="currentColor">
+          Attention
+        </text>
+        <path
+          d="M 146 220 L 146 208 L 106 198"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.4"
+          markerEnd="url(#til-arrow)"
+        />
+
+        {/* Addition 1 */}
+        <rect
+          x="42"
+          y="186"
+          width="60"
+          height="22"
+          rx="4"
+          className="fill-white stroke-[#1e1e24] dark:fill-[#26262f] dark:stroke-[#d4d4dc]"
+          strokeWidth="1.4"
+        />
+        <text x="72" y="200" textAnchor="middle" fontSize="10.5" fill="currentColor">
+          addition
+        </text>
+
+        {/* Layer Norm 1 (on highway) */}
+        <rect
+          x="36"
+          y="150"
+          width="72"
+          height="22"
+          rx="4"
+          className="fill-[#c7e6a3] stroke-[#1e1e24] dark:fill-[#2e5224] dark:stroke-[#d4d4dc]"
+          strokeWidth="1.4"
+        />
+        <text x="72" y="164" textAnchor="middle" fontSize="10.5" fill="currentColor">
+          Layer Norm
+        </text>
+
+        {/* Branch 2: FFN */}
+        <path
+          d="M 72 142 L 146 132 L 146 124"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.4"
+          markerEnd="url(#til-arrow)"
+        />
+        <rect
+          x="114"
+          y="100"
+          width="64"
+          height="22"
+          rx="4"
+          className="fill-[#bfdbfe] stroke-[#1e1e24] dark:fill-[#22406e] dark:stroke-[#d4d4dc]"
+          strokeWidth="1.4"
+        />
+        <text x="146" y="114" textAnchor="middle" fontSize="10.5" fill="currentColor">
+          FFN
+        </text>
+        <path
+          d="M 146 100 L 146 92 L 106 86"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.4"
+          markerEnd="url(#til-arrow)"
+        />
+
+        {/* Addition 2 */}
+        <rect
+          x="42"
+          y="75"
+          width="60"
+          height="22"
+          rx="4"
+          className="fill-white stroke-[#1e1e24] dark:fill-[#26262f] dark:stroke-[#d4d4dc]"
+          strokeWidth="1.4"
+        />
+        <text x="72" y="89" textAnchor="middle" fontSize="10.5" fill="currentColor">
+          addition
+        </text>
+
+        {/* Layer Norm 2 (on highway) */}
+        <rect
+          x="36"
+          y="46"
+          width="72"
+          height="20"
+          rx="4"
+          className="fill-[#c7e6a3] stroke-[#1e1e24] dark:fill-[#2e5224] dark:stroke-[#d4d4dc]"
+          strokeWidth="1.4"
+        />
+        <text x="72" y="59" textAnchor="middle" fontSize="10.5" fill="currentColor">
+          Layer Norm
+        </text>
+
+        {/* === RIGHT: PRE-LN === */}
+        {/* Clean unobstructed residual highway */}
+        <path
+          d="M 270 308 L 270 46 L 256 46 L 280 24 L 304 46 L 290 46 L 290 308 Z"
+          className="fill-[#e6d5c3] dark:fill-[#3b332b]"
+        />
+        <line
+          x1="280"
+          y1="296"
+          x2="280"
+          y2="46"
+          stroke="currentColor"
+          strokeWidth="1.5"
+          markerEnd="url(#til-arrow)"
+        />
+        <text x="280" y="320" textAnchor="middle" fontSize="13" fontStyle="italic" fill="currentColor">
+          xₗ
+        </text>
+        <text x="280" y="40" textAnchor="middle" fontSize="13" fontStyle="italic" fill="currentColor">
+          xₗ₊₁
+        </text>
+
+        {/* Branch 1: Layer Norm -> Multi-Head Attention */}
+        <path
+          d="M 280 282 L 354 270 L 354 264"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.4"
+          markerEnd="url(#til-arrow)"
+        />
+        <rect
+          x="318"
+          y="240"
+          width="72"
+          height="22"
+          rx="4"
+          className="fill-[#c7e6a3] stroke-[#1e1e24] dark:fill-[#2e5224] dark:stroke-[#d4d4dc]"
+          strokeWidth="1.4"
+        />
+        <text x="354" y="254" textAnchor="middle" fontSize="10.5" fill="currentColor">
+          Layer Norm
+        </text>
+        <line
+          x1="354"
+          y1="240"
+          x2="354"
+          y2="228"
+          stroke="currentColor"
+          strokeWidth="1.4"
+          markerEnd="url(#til-arrow)"
+        />
+        <rect
+          x="316"
+          y="194"
+          width="76"
+          height="32"
+          rx="4"
+          className="fill-[#fde68a] stroke-[#1e1e24] dark:fill-[#715b16] dark:stroke-[#d4d4dc]"
+          strokeWidth="1.4"
+        />
+        <text x="354" y="208" textAnchor="middle" fontSize="10.5" fill="currentColor">
+          Multi-Head
+        </text>
+        <text x="354" y="220" textAnchor="middle" fontSize="10.5" fill="currentColor">
+          Attention
+        </text>
+        <path
+          d="M 354 194 L 354 184 L 314 176"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.4"
+          markerEnd="url(#til-arrow)"
+        />
+
+        {/* Addition 1 */}
+        <rect
+          x="250"
+          y="164"
+          width="60"
+          height="22"
+          rx="4"
+          className="fill-white stroke-[#1e1e24] dark:fill-[#26262f] dark:stroke-[#d4d4dc]"
+          strokeWidth="1.4"
+        />
+        <text x="280" y="178" textAnchor="middle" fontSize="10.5" fill="currentColor">
+          addition
+        </text>
+
+        {/* Branch 2: Layer Norm -> FFN */}
+        <path
+          d="M 280 156 L 354 146 L 354 140"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.4"
+          markerEnd="url(#til-arrow)"
+        />
+        <rect
+          x="318"
+          y="116"
+          width="72"
+          height="22"
+          rx="4"
+          className="fill-[#c7e6a3] stroke-[#1e1e24] dark:fill-[#2e5224] dark:stroke-[#d4d4dc]"
+          strokeWidth="1.4"
+        />
+        <text x="354" y="130" textAnchor="middle" fontSize="10.5" fill="currentColor">
+          Layer Norm
+        </text>
+        <line
+          x1="354"
+          y1="116"
+          x2="354"
+          y2="104"
+          stroke="currentColor"
+          strokeWidth="1.4"
+          markerEnd="url(#til-arrow)"
+        />
+        <rect
+          x="322"
+          y="80"
+          width="64"
+          height="22"
+          rx="4"
+          className="fill-[#bfdbfe] stroke-[#1e1e24] dark:fill-[#22406e] dark:stroke-[#d4d4dc]"
+          strokeWidth="1.4"
+        />
+        <text x="354" y="94" textAnchor="middle" fontSize="10.5" fill="currentColor">
+          FFN
+        </text>
+        <path
+          d="M 354 80 L 354 72 L 314 66"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.4"
+          markerEnd="url(#til-arrow)"
+        />
+
+        {/* Addition 2 */}
+        <rect
+          x="250"
+          y="55"
+          width="60"
+          height="22"
+          rx="4"
+          className="fill-white stroke-[#1e1e24] dark:fill-[#26262f] dark:stroke-[#d4d4dc]"
+          strokeWidth="1.4"
+        />
+        <text x="280" y="69" textAnchor="middle" fontSize="10.5" fill="currentColor">
+          addition
+        </text>
+      </svg>
+
+      {caption && (
+        <figcaption className="mt-2.5 text-center text-[0.84em] text-[#575766] dark:text-[#a3a3b2]">
+          ↳ {caption}
+        </figcaption>
+      )}
+    </figure>
+  );
+}
+
+function MathFractionBlock({
+  lead,
+  highlight,
+  description,
+  lhs,
+  numerator,
+  denominator,
+  suffix,
+}: {
+  lead?: string;
+  highlight?: string;
+  description?: string;
+  lhs: string;
+  numerator: string;
+  denominator: string;
+  suffix?: string;
+}) {
+  return (
+    <div className="rounded-xl border border-dashed border-[#1e1e24]/20 bg-[#faf9f5]/80 px-5 py-4 dark:border-[#d4d4dc]/20 dark:bg-[#1c1c22]/80">
+      {(lead || highlight || description) && (
+        <p className="text-center text-[0.95em] leading-snug">
+          {lead && <span>{lead} </span>}
+          {highlight && <strong className="font-bold">{highlight}</strong>}
+          {description && <span> – {description}</span>}
+        </p>
+      )}
+
+      <div className="font-mono-label mt-4 flex flex-wrap items-center justify-center gap-2 text-[1.02em]">
+        <span>{lhs}</span>
+        <span className="inline-flex flex-col items-center leading-tight">
+          <span className="border-b border-current px-2 pb-1">{numerator}</span>
+          <span className="px-2 pt-1">{denominator}</span>
+        </span>
+        {suffix && <span>{suffix}</span>}
+      </div>
+    </div>
+  );
+}
+
 function renderBlock(block: TilBlock, idx: number, monoCode: boolean) {
   switch (block.type) {
     case 'header-box':
@@ -512,6 +896,23 @@ function renderBlock(block: TilBlock, idx: number, monoCode: boolean) {
           alt={block.alt}
           caption={block.caption}
           maxWidth={block.maxWidth}
+        />
+      );
+
+    case 'diagram':
+      return <PreVsPostLnDiagram key={idx} caption={block.caption} />;
+
+    case 'math':
+      return (
+        <MathFractionBlock
+          key={idx}
+          lead={block.lead}
+          highlight={block.highlight}
+          description={block.description}
+          lhs={block.lhs}
+          numerator={block.numerator}
+          denominator={block.denominator}
+          suffix={block.suffix}
         />
       );
 

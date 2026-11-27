@@ -1,12 +1,13 @@
 import type { TilBlock, TilEntry } from '../../types/til';
 import { til20261125 } from './2026-11-25-tokenizer-bpe';
+import { til20261127 } from './2026-11-27-modern-transformer-layernorm-rmsnorm';
 
 /**
  * All Today I Learned (TIL) rough whiteboard boards, newest first.
  * To add a new day's rough notes, create a new file in `src/data/til/`
  * and register it in this array.
  */
-export const TIL_ENTRIES: TilEntry[] = [til20261125].sort((a, b) =>
+export const TIL_ENTRIES: TilEntry[] = [til20261127, til20261125].sort((a, b) =>
   b.date.localeCompare(a.date),
 );
 
@@ -44,6 +45,18 @@ function extractBlockText(block: TilBlock): string {
       ].join(' ');
     case 'image':
       return [block.alt, block.caption ?? ''].join(' ');
+    case 'diagram':
+      return [block.kind, block.caption ?? ''].join(' ');
+    case 'math':
+      return [
+        block.lead ?? '',
+        block.highlight ?? '',
+        block.description ?? '',
+        block.lhs,
+        block.numerator,
+        block.denominator,
+        block.suffix ?? '',
+      ].join(' ');
     case 'callout':
       return [block.label ?? '', ...block.lines].join(' ');
     case 'divider':
