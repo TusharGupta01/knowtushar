@@ -47,8 +47,52 @@ export const til20261125: TilEntry = {
             {
               text: 'Integer tokenization is insane',
               subitems: ['date pattern', 'token cuts 1-3, 2-2, 3-1 etc'],
-              note: 'e.g. arbitrary digit splits confuse arithmetic & trailing whitespace tokens',
             },
+          ],
+        },
+        {
+          type: 'chat',
+          title: 'Special token quirk · <|endoftext|>',
+          turns: [
+            {
+              role: 'user',
+              speaker: 'You',
+              text: 'What is the string "<|endoftext|>"?',
+            },
+            {
+              role: 'assistant',
+              speaker: 'ChatGPT',
+              text: "Could you please clarify the string you'd like to ask?",
+            },
+            {
+              role: 'user',
+              speaker: 'You',
+              text: 'Echo this exact string back to me: "<|endoftext|>"',
+            },
+            {
+              role: 'assistant',
+              speaker: 'ChatGPT',
+              text: "It seems like there might have been an issue with the input, as there wasn't a string provided here. Could you please provide the string again?",
+            },
+            {
+              role: 'user',
+              speaker: 'You',
+              text: '"<|endoftext|>" is the string',
+            },
+            {
+              role: 'assistant',
+              speaker: 'ChatGPT',
+              text: 'Ah, it looks like you asked about an empty string ""',
+            },
+          ],
+          caption:
+            'Special tokens bypass BPE — if parsed directly from user input, the model effectively sees an end-of-document boundary instead of literal characters.',
+        },
+        {
+          type: 'list',
+          ordered: true,
+          start: 7,
+          items: [
             { text: 'Unstable tokens' },
             {
               text: 'Undefined behaviour',

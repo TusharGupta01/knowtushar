@@ -6,6 +6,12 @@ export interface TilListItem {
   note?: string;
 }
 
+export interface TilChatTurn {
+  role: 'user' | 'assistant';
+  speaker?: string;
+  text: string;
+}
+
 export type TilBlock =
   | {
       type: 'header-box';
@@ -49,6 +55,19 @@ export type TilBlock =
       question: string;
       lines: string[];
       caveat?: string;
+    }
+  | {
+      type: 'chat';
+      title?: string;
+      turns: TilChatTurn[];
+      caption?: string;
+    }
+  | {
+      type: 'image';
+      src: string;
+      alt: string;
+      caption?: string;
+      maxWidth?: number;
     }
   | {
       type: 'callout';

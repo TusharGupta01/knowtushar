@@ -12,7 +12,7 @@ import {
   Plus,
   Type,
 } from 'lucide-react';
-import type { SketchTone, TilBlock, TilEntry, TilSection } from '../types/til';
+import type { SketchTone, TilBlock, TilChatTurn, TilEntry, TilSection } from '../types/til';
 import { formatTilDate } from '../data/til';
 
 interface ExcaliBoardProps {
@@ -218,6 +218,128 @@ function FormulaSketchBlock({
   );
 }
 
+function renderInlineSpecialTokens(text: string) {
+  const parts = text.split(/(<\|[^|]+\|>)/g);
+  return parts.map((part, idx) =>
+    /^<\|[^|]+\|>$/.test(part) ? (
+      <span
+        key={idx}
+        className="font-mono-label mx-0.5 inline-block rounded bg-[#ecebff] px-1 py-0.25 text-[0.8em] text-[#4a46b5] [font-variant-ligatures:none] dark:bg-[#353263] dark:text-[#d5d3ff]"
+      >
+        {part}
+      </span>
+    ) : (
+      <span key={idx}>{part}</span>
+    ),
+  );
+}
+
+function ChatSketchBlock({
+  title,
+  turns,
+  caption,
+}: {
+  title?: string;
+  turns: TilChatTurn[];
+  caption?: string;
+}) {
+  return (
+    <div className="ml-2 max-w-[420px] rounded-xl border border-dashed border-[#1e1e24]/25 bg-[#faf9f5]/90 p-3.5 shadow-[2px_2px_0px_rgba(30,30,36,0.08)] sm:ml-5 dark:border-[#d4d4dc]/25 dark:bg-[#1c1c22]/90 dark:shadow-[2px_2px_0px_rgba(0,0,0,0.25)]">
+      {title && (
+        <div className="font-mono-label mb-2.5 flex items-center gap-1.5 border-b border-dashed border-[#1e1e24]/15 pb-1.5 text-[10.5px] tracking-wide text-[var(--ink-muted)] dark:border-[#d4d4dc]/15">
+          <span
+            aria-hidden="true"
+            className="inline-block h-2 w-2 rounded-full bg-[#6965db] dark:bg-[#a8a5ff]"
+          />
+          <span>{title}</span>
+        </div>
+      )}
+
+      <div className="space-y-2.5 text-[0.86em] leading-[1.42]">
+        {turns.map((turn, idx) => {
+          const isUser = turn.role === 'user';
+          const label = turn.speaker ?? (isUser ? 'You' : 'ChatGPT');
+          return (
+            <div key={idx} className="flex items-start gap-2.5">
+              <span
+                aria-hidden="true"
+                className={`mt-0.5 inline-flex h-4.5 w-4.5 shrink-0 items-center justify-center rounded-full text-[9px] font-bold text-white ${
+                  isUser
+                    ? 'bg-emerald-600 dark:bg-emerald-500'
+                    : 'bg-[#7c69db] dark:bg-[#8b7cf0]'
+                }`}
+              >
+                {isUser ? 'U' : 'G'}
+              </span>
+              <div className="min-w-0 flex-1">
+                <p className="font-mono-label text-[10px] font-semibold tracking-wide text-[var(--ink-muted)]">
+                  {label}
+                </p>
+                <p className="mt-0.5 text-[var(--ink)]">
+                  {renderInlineSpecialTokens(turn.text)}
+                </p>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {caption && (
+        <p className="mt-3 border-t border-dashed border-[#1e1e24]/15 pt-2 text-[0.82em] leading-[1.4] text-[#575766] dark:border-[#d4d4dc]/15 dark:text-[#a3a3b2]">
+          ↳ {caption}
+        </p>
+      )}
+    </div>
+  );
+}
+
+function ImageSketchBlock({
+  src,
+  alt,
+  caption,
+  maxWidth,
+}: {
+  src: string;
+  alt: string;
+  caption?: string;
+  maxWidth?: number;
+}) {
+  const [zoomed, setZoomed] = useState(false);
+
+  return (
+    <figure className="my-1" style={maxWidth ? { maxWidth: `${maxWidth}px` } : undefined}>
+      <button
+        type="button"
+        onClick={() => setZoomed(true)}
+        className="group block w-full cursor-zoom-in overflow-hidden rounded-xl border border-dashed border-[#1e1e24]/25 bg-[var(--surface-bg)] p-2 text-left transition-colors hover:border-[#6965db] dark:border-[#d4d4dc]/25 dark:hover:border-[#a8a5ff]"
+      >
+        <img src={src} alt={alt} className="h-auto w-full rounded-lg" />
+      </button>
+      {caption && (
+        <figcaption className="mt-1.5 text-[0.85em] text-[#575766] dark:text-[#a3a3b2]">
+          ↳ {caption}
+        </figcaption>
+      )}
+
+      {zoomed && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-label={alt}
+          onClick={() => setZoomed(false)}
+          className="fixed inset-0 z-50 flex cursor-zoom-out items-center justify-center bg-[#121212]/75 p-4 backdrop-blur-xs"
+        >
+          <img
+            src={src}
+            alt={alt}
+            className="max-h-[88vh] max-w-[92vw] rounded-xl border border-[#d4d4dc]/30 bg-white p-2 shadow-2xl"
+          />
+        </div>
+      )}
+    </figure>
+  );
+}
+
 function renderBlock(block: TilBlock, idx: number, monoCode: boolean) {
   switch (block.type) {
     case 'header-box':
@@ -368,6 +490,27 @@ function renderBlock(block: TilBlock, idx: number, monoCode: boolean) {
           lines={block.lines}
           caveat={block.caveat}
           monoCode={monoCode}
+        />
+      );
+
+    case 'chat':
+      return (
+        <ChatSketchBlock
+          key={idx}
+          title={block.title}
+          turns={block.turns}
+          caption={block.caption}
+        />
+      );
+
+    case 'image':
+      return (
+        <ImageSketchBlock
+          key={idx}
+          src={block.src}
+          alt={block.alt}
+          caption={block.caption}
+          maxWidth={block.maxWidth}
         />
       );
 

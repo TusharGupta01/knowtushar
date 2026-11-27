@@ -36,6 +36,14 @@ function extractBlockText(block: TilBlock): string {
       return [block.title ?? '', block.code].join(' ');
     case 'formula':
       return [block.question, ...block.lines, block.caveat ?? ''].join(' ');
+    case 'chat':
+      return [
+        block.title ?? '',
+        ...block.turns.flatMap((t) => [t.speaker ?? '', t.text]),
+        block.caption ?? '',
+      ].join(' ');
+    case 'image':
+      return [block.alt, block.caption ?? ''].join(' ');
     case 'callout':
       return [block.label ?? '', ...block.lines].join(' ');
     case 'divider':
