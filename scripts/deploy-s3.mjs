@@ -1,4 +1,6 @@
 import { execFileSync } from 'node:child_process';
+import { readdirSync } from 'node:fs';
+import { join, relative, resolve } from 'node:path';
 
 const bucket = process.env.S3_BUCKET;
 if (!bucket) {
@@ -11,6 +13,22 @@ const run = (cmd, args) => {
   console.log(`> ${cmd} ${args.join(' ')}`);
   execFileSync(cmd, args, { stdio: 'inherit' });
 };
+
+function findPrerenderedRoutes(dir, baseDir = dir) {
+  const results = [];
+  for (const entry of readdirSync(dir, { withFileTypes: true })) {
+    const full = join(dir, entry.name);
+    if (entry.isDirectory()) {
+      results.push(...findPrerenderedRoutes(full, baseDir));
+    } else if (entry.name === 'index.html') {
+      const relDir = relative(baseDir, dir).replace(/\\/g, '/');
+      if (relDir) {
+        results.push({ route: relDir, file: full });
+      }
+    }
+  }
+  return results;
+}
 
 run('npm', ['run', 'build']);
 
@@ -96,19 +114,23 @@ run('aws', [
   'application/rss+xml; charset=utf-8',
 ]);
 
-// Prerendered HTML pages (root + /experience + /notes + /til + /til/<slug>)
-for (const dir of ['experience', 'notes', 'til']) {
-  run('aws', [
-    's3',
-    'sync',
-    `dist/${dir}`,
-    `s3://${bucket}/${dir}`,
-    '--delete',
-    '--cache-control',
-    'no-cache, no-store, must-revalidate',
-    '--content-type',
-    'text/html; charset=utf-8',
-  ]);
+// Prerendered HTML pages: upload BOTH extensionless key (e.g. `til`, `til/<slug>`)
+// and `<route>/index.html` so CloudFront + S3 REST origin serves 200 OK without
+// needing a CloudFront Function or S3 website endpoint.
+const prerendered = findPrerenderedRoutes(resolve('dist'));
+for (const { route, file } of prerendered) {
+  for (const key of [route, `${route}/index.html`]) {
+    run('aws', [
+      's3',
+      'cp',
+      file,
+      `s3://${bucket}/${key}`,
+      '--cache-control',
+      'no-cache, no-store, must-revalidate',
+      '--content-type',
+      'text/html; charset=utf-8',
+    ]);
+  }
 }
 
 run('aws', [
@@ -130,16 +152,8 @@ if (distributionId) {
     '--distribution-id',
     distributionId,
     '--paths',
-    '/index.html',
-    '/experience/*',
-    '/notes/*',
-    '/til/*',
-    '/sitemap.xml',
-    '/robots.txt',
-    '/feed.xml',
-    '/data/*',
-    '/Tushar_Gupta_Resume.pdf',
+    '/*',
   ]);
 }
 
-console.log(`Deployed dist/ to s3://${bucket}`);
+console.log(`Deployed dist/ to s3://${bucket} (${prerendered.length} prerendered routes)`);
